@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Watchlist de Ações</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  </head>
+
+  <body>
+    <h1>📈 Watchlist de Ações</h1>
+
+    {% with messages = get_flashed_messages(with_categories=True) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form action="{{ url_for('index') }}" method="POST">
+      <label for="ticker">Adicionar ticker:</label>
+      <input type="text" name="ticker" id="ticker" required placeholder="Ex: AAPL">
+      <input type="submit" value="Adicionar">
+    </form>
+
+    {% if stocks %}
+      <table>
+        <thead>
+          <tr>
+            <th>Ticker</th>
+            <th>Preço</th>
+            <th>Variação</th>
+            <th>%</th>
+            <th>High</th>
+            <th>Low</th>
+            <th>Volume</th>
+            <th>Setor</th>
+            <th>P/E</th>
+            <th>Div. Yield</th>
+            <th>Market Cap</th>
+            <th>Ação</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for stock in stocks %}
+          <tr>
+            <td>{{ stock.ticker }}</td>
+            <td>{{ stock.price }}</td>
+            <td class="{{ 'positive' if stock.change > 0 else 'negative' }}">
+              {{ stock.change }}
+            </td>
+            <td class="{{ 'positive' if stock.change_pct > 0 else 'negative' }}">
+              {{ stock.change_pct }}%
+            </td>
+            <td>{{ stock.high }}</td>
+            <td>{{ stock.low }}</td>
+            <td>{{ "{:,}".format(stock.volume) }}</td>
+            <td>{{ stock.sector or '-' }}</td>
+            <td>{{ stock.pe_ratio or '-' }}</td>
+            <td>{{ '{:.2%}'.format(stock.dividend_yield) if stock.dividend_yield else '-' }}</td>
+            <td>{{ "{:,.0f}".format(stock.market_cap) if stock.market_cap else '-' }}</td>
+            <td><a href="{{ url_for('remove', ticker=stock.ticker) }}">Remover</a></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>Nenhum ticker na lista.</p>
+    {% endif %}
+  </body>
+</html>
